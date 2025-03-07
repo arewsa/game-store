@@ -13,7 +13,11 @@
             >
               Create an account
             </h1>
-            <form class="space-y-4 md:space-y-6" @submit.prevent="onClick" method="post">
+            <form
+              class="space-y-4 md:space-y-6"
+              @submit.prevent="onClick"
+              method="post"
+            >
               <div>
                 <label
                   for="first_name"
@@ -24,6 +28,8 @@
                   type="text"
                   name="first_name"
                   id="first_name"
+                  required
+                  v-model="firstName"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Ivan"
                 />
@@ -38,6 +44,8 @@
                   type="text"
                   name="second_name"
                   id="second_name"
+                  v-model="second_name"
+                  required
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Ivanov"
                 />
@@ -52,6 +60,8 @@
                   type="email"
                   name="email"
                   id="email"
+                  v-model="mail"
+                  required
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="name@mail.com"
                 />
@@ -66,7 +76,9 @@
                   type="password"
                   name="password"
                   id="password"
+                  v-model="password"
                   placeholder="••••••••"
+                  required
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 />
               </div>
@@ -80,9 +92,23 @@
                   type="password"
                   name="confirm-password"
                   id="confirm-password"
+                  required
+                  v-model="confirm_password"
                   placeholder="••••••••"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  :class="{
+                    'focus:ring-primary-600 focus:border-primary-600':
+                      confirm_password == password,
+                    'focus:ring-red-600 focus:border-red-600 ring-red-600 border-red-600':
+                      confirm_password != password,
+                  }"
                 />
+                <a
+                  v-if="confirm_password != password"
+                  class="text-red-600 text-sm"
+                >
+                  Passwords don't match
+                </a>
               </div>
               <button
                 type="submit"
@@ -105,17 +131,51 @@
         </div>
       </div>
     </section>
+    <Toast
+    :message="'You\'re are already registered!'"
+    :description="' Maybe you just need to log in?'"
+    v-model="userExist"
+    ></Toast>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import { RouterLink } from "vue-router";
+import router from "../router/router";
+import Toast from "./Toast.vue";
 
-function onClick()
-{
-  
+const firstName = ref("");
+const second_name = ref("");
+const mail = ref("");
+const password = ref("");
+const confirm_password = ref("");
+
+const userExist = ref(false);
+const url = "http://localhost:8000/users";
+
+async function onClick() {
+  const formData = {
+    name: firstName.value,
+    surname: second_name.value,
+    mail: mail.value,
+    password: password.value,
+  };
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
+  });
+  const data = await response.json();
+  if (data.status == 200) {
+    router.push("login");
+  } 
+  if (data.status == 100) {
+    userExist.value = true;
+  }
 }
-
 </script>
 
 <style scoped></style>
