@@ -12,7 +12,7 @@
           >
             Sign in to your account
           </h1>
-          <form class="space-y-4 md:space-y-6" action="" method="get">
+          <form class="space-y-4 md:space-y-6" @submit.prevent="login" method="post">
             <div>
               <label
                 for="email"
@@ -22,6 +22,7 @@
               <input
                 type="email"
                 name="email"
+                v-model="mail"
                 id="email"
                 class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="name@mail.com"
@@ -36,6 +37,7 @@
               <input
                 type="password"
                 name="password"
+                v-model="password"
                 id="password"
                 placeholder="••••••••"
                 class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -84,10 +86,46 @@
       </div>
     </div>
   </section>
+  <Toast
+  :message="'Login error!'"
+  :description="'Perhaps you entered the wrong login or password?'"
+  v-model="loginError"></Toast>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import { RouterLink } from "vue-router";
+import router from "../router/router";
+import Toast from "./Toast.vue";
+
+const mail = ref("")
+const password = ref("")
+const loginError = ref(false)
+
+async function login() {
+  const url = "http://localhost:8000/login"
+  const loginData = {
+    login: mail.value,
+    password: password.value,
+  };
+  const response = await fetch(url, {
+    credentials: 'include',
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(loginData),
+  });
+  const data = await response.json();
+  if (data.status == 200) {
+    // router.push("main");
+  } 
+  if (data.status == 102) {
+    loginError.value = true;
+  }
+  console.log(response, data)
+}
+
 </script>
 
 <style scoped></style>
