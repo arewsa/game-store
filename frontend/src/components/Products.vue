@@ -4,10 +4,8 @@
       class="grid grid-cols-6 grid-rows-3 gap-5 grid-flow-row flex-auto grow-0 m-auto"
     >
       <Card
-        :gameName="game.game_name"
-        :gameImg="game.game_img"
-        :gamePrice="game.game_price"
-        v-for="game in listOfGames"
+        :game="game"
+        v-for="game in gameStore.getGames"
       />
     </div>
   </div>
@@ -15,21 +13,14 @@
 
 <script setup lang="ts">
 import Card from "./Card.vue";
-import { onMounted, ref } from 'vue'
+import { onMounted } from "vue";
+import { useGamesStore } from "../stores/gameStore";
 
-type Game = {
-  game_price: number;
-  game_img: string;
-  game_name: string;
-  game_id: number;
-}
-let listOfGames = ref<Game[]>([])
+const gameStore = useGamesStore();
 
 onMounted(async () => {
-  const response = await fetch("http://localhost:8000/games");  
-  const data: Game[] = await response.json()
-  listOfGames.value = data
-})
+  gameStore.fetchGames();
+});
 </script>
 
 <style scoped></style>

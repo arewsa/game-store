@@ -98,14 +98,16 @@ import { RouterLink } from "vue-router";
 import router from "../router/router";
 import Toast from "./Toast.vue";
 
+
 const mail = ref("")
 const password = ref("")
 const loginError = ref(false)
 
 async function login() {
-  const url = "http://localhost:8000/login"
+
+  const url = "http://localhost:8000/users/login"
   const loginData = {
-    login: mail.value,
+    mail: mail.value,
     password: password.value,
   };
   const response = await fetch(url, {
@@ -117,13 +119,13 @@ async function login() {
     body: JSON.stringify(loginData),
   });
   const data = await response.json();
-  if (data.status == 200) {
-    // router.push("main");
-  } 
-  if (data.status == 102) {
+  if (await response.status == 200) {
+    sessionStorage.setItem("access_token", data.access_token);
+    router.push("main/games");
+  }
+  else {
     loginError.value = true;
   }
-  console.log(response, data)
 }
 
 </script>

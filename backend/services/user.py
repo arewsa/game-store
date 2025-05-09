@@ -1,24 +1,27 @@
-from models.user import AddUser
-from schemas.user import User, UserInSystem
-from repository.abstract_repo import AbstractRepository
+from pydantic import BaseModel
+from sqlalchemy import select
+from models.user import UsersORM
+from sqlalchemy.ext.asyncio import AsyncSession
+import bcrypt
 
 
 class UserService:
-    def __init__(self, users_repository: AbstractRepository):
-        self.users_repository: AbstractRepository = users_repository
-
-    def add_user(self, user: AddUser) -> User:
-        user = AddUser(user)
-        user_data = user.get_data()
-        return self.users_repository.add(user_data)
+    async def add(self, user: BaseModel, session: AsyncSession) -> UsersORM | None:
+        user_orm = UsersORM(**user.model_dump())
+        user_orm.password = bcrypt.hashpw(password=user.password.encode(), salt=bcrypt.gensalt()).decode()
+        if await self.get_by_mail(user.mail, session) is None:
+            session.add(user_orm)
+            await session.commit()
+            await session.refresh(user_orm)
+            return user_orm
+        return None
     
-    def get_user(self, email: str) -> UserInSystem:
-        data = self.users_repository.get(email, "user_id, mail, password")
-        user: UserInSystem = UserInSystem(user_id=data[0], login=data[1], password=data[2])
-        return user
+    async def get_by_id(self, user_id: int, session: AsyncSession) -> UsersORM | None:
+        stmt = select(UsersORM).where(UsersORM.id == user_id)
+        res = await session.execute(statement=stmt)
+        return res.scalar_one_or_none()
     
-    def get_all_users(self) -> list[UserInSystem]:
-        users: list[UserInSystem] = []
-        for user in self.users_repository.get_all(string_of_param="user_id, mail, password"):
-            users.append(UserInSystem(user_id=user[0], login=user[1], password=user[2]))
-        return users
+    async def get_by_mail(self, mail: str, session: AsyncSession) -> UsersORM | None:
+        stmt = select(UsersORM).where(UsersORM.mail == mail)
+        res = await session.execute(statement=stmt)
+        return res.scalar_one_or_none()

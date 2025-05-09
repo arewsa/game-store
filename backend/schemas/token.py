@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class Tokens(BaseModel):
     access_token: str
@@ -12,8 +12,8 @@ class Payload(BaseModel):
     exp: datetime
 
 class AccessToken(Payload):
-    iat: datetime = datetime.now(timezone.utc)
-    exp: datetime = datetime.now(timezone.utc) + timedelta(minutes=15)
+    iat: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+    exp: datetime = Field(default_factory=lambda:datetime.now(timezone.utc) + timedelta(minutes=30))
     type: str = "access"
     def payload(self):
         return {

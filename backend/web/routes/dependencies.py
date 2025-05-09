@@ -2,20 +2,17 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 from services.token import decode_jwt
-from models.product import TableGame
-from repository.product_repository import ProductRepository
 from services.product import ProductService
-from repository.user_repository import UserRepository
 from services.user import UserService
 
 http_bearer = HTTPBearer()
 
 def users_service():
 
-    return UserService(UserRepository())
+    return UserService()
 
-def game_service():
-    return ProductService(ProductRepository(TableGame))
+def product_service():
+    return ProductService()
 
 def authorize(credentials: HTTPAuthorizationCredentials = Depends(http_bearer)):
     try:
@@ -24,3 +21,4 @@ def authorize(credentials: HTTPAuthorizationCredentials = Depends(http_bearer)):
         return user_id
     except jwt.exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
+    
