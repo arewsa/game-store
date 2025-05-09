@@ -22,7 +22,7 @@
         </span>
       </p>
       <RouterLink
-        to="/login"
+        to="/main/games"
         class="inline-flex items-center justify-center text-base text-center bg-gradient-to-r from-cyan-500 to-teal-500 px-8 py-4 font-medium text-white transition-transform hover:scale-105 rounded-lg"
       >
         Lets start

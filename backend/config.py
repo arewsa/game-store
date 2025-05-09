@@ -1,12 +1,19 @@
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+db_user = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
+host = os.getenv("DB_HOST")
+db_name = os.getenv("DB_NAME")
 
 
-host = "127.0.0.1"
-db_user = "arewsa"
-password = "PythonMain.Py"
-db_name = "game_store"
+class Database(BaseModel):
+    url: str = f"postgresql+asyncpg://{db_user}:{password}@{host}/{db_name}"
 
 class AuthJWT(BaseModel):
     private_key_path: Path = Path("./certs/jwt-private.pem")
@@ -15,5 +22,6 @@ class AuthJWT(BaseModel):
 
 class Settings(BaseSettings):
     auth_jwt: AuthJWT = AuthJWT()
+    database: Database = Database()
 
 settings = Settings()

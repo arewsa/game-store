@@ -7,9 +7,9 @@
     :class="{ '-translate-x-0': showSidebar, '-translate-x-full': !showSidebar}"
   >
     <Icon icon="mynaui:accessibility" height="40" class="m-1 mb-6"> </Icon>
-    <ItemOfSidebar title="Games" iconName="carbon:game-console" />
-    <ItemOfSidebar title="Cart" iconName="mdi:cart-outline" />
-    <ItemOfSidebar title="Add your card" iconName="icons8:plus"></ItemOfSidebar>
+    <ItemOfSidebar title="Games" iconName="carbon:game-console" route="games"/>
+    <ItemOfSidebar title="Cart" iconName="mdi:cart-outline" route="cart"/>
+    <ItemOfSidebar title="Add your game" iconName="icons8:plus" route="addGame"></ItemOfSidebar>
     <button @click="showSidebar = !showSidebar" v-on:click="$emit('onClick')">
       <Icon
         icon="humbleicons:times"
@@ -18,7 +18,6 @@
       />
     </button>
   </main>
-  <!-- <div class="blur-sm z-40 h-screen w-screen bg-opacity-50" v-if="showSidebar"></div> -->
 </template>
 
 <script setup lang="ts">

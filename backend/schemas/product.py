@@ -1,9 +1,16 @@
 from pydantic import BaseModel
 
-class Product(BaseModel):
+class CreateProduct(BaseModel):
     name: str
-    price: int
+    price: float
     img: str
+    product: str | None = None
 
-class Game(Product):
-    product_id: int | None = None
+class ReadProduct(BaseModel):
+    name: str
+    price: float
+    img: str
+    id: int
+
+    class Config:
+        from_attributes = True

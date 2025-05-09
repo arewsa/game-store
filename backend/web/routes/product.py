@@ -1,20 +1,18 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, Query, Request
-from schemas.product import Game, Product
+from fastapi import APIRouter, Depends, Request
+from schemas.product import CreateProduct, ReadProduct
 from services.product import ProductService
-from web.routes.dependencies import authorize, game_service
+from web.routes.dependencies import authorize, product_service
+from sqlalchemy.ext.asyncio import AsyncSession
+from models.database import db_helper
 
-router = APIRouter(prefix="/product", tags=["Products"])
+router = APIRouter(prefix="/products", tags=["Products"], dependencies=[Depends(authorize)])
 
-@router.get("/games", status_code=200)
-async def get_games(request: Request, product_service: ProductService = Depends(game_service)):
-    return product_service.get_all_products(Game)
+@router.post("", status_code=201)
+async def add_game(product: CreateProduct, product_service: ProductService = Depends(product_service), session: AsyncSession = Depends(db_helper.get_session)) -> ReadProduct:
+    return ReadProduct.model_validate(await product_service.add_product(product, session))
 
-@router.post("/game", status_code=200)
-async def add_game(game: Product, product_service: ProductService = Depends(game_service)):
-    return product_service.add_product(game)
+@router.get("", status_code=200)
+async def get_games(request: Request, product_type: str | None = None, product_service: ProductService = Depends(product_service), session: AsyncSession = Depends(db_helper.get_session)) -> list[ReadProduct]:
+    list_of_products = await product_service.get_all_products(session, product_name=product_type)
+    return [ReadProduct.model_validate(product) for product in list_of_products]
 
-@router.get("games/shopping_cart", status_code=200)
-async def list_of_game_in_cart(list_of_id: Annotated[list[int], Query()], product_service: ProductService = Depends(game_service)):
-    list_of_games = product_service.get_product_in_shopping_cart(list_of_id=list_of_id, product_class=Game)
-    return list_of_games
